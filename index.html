@@ -1,22 +1,112 @@
-<!-- STEP 1: Copy and paste all of this code into a file named index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abby's 18th Birthday Countdown</title>
-    
-    <!-- Tailwind CSS for layout (requires internet) -->
+    <!-- Tailwind CSS for layout -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts (requires internet) -->
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the split-flap effect */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
 
-    <!-- Link to your local stylesheet -->
-    <link rel="stylesheet" href="style.css">
+        .flip-card {
+            display: inline-flex;
+            flex-direction: column;
+            position: relative;
+            width: 4rem; 
+            height: 6rem;
+            font-size: 5rem; 
+            line-height: 6rem; /* This is key for vertical alignment */
+            font-weight: 900;
+            perspective: 500px;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background: #1a1a1a;
+            color: #f0f0f0;
+        }
+
+        @media (min-width: 768px) {
+            .flip-card {
+                width: 5rem;
+                height: 7.5rem;
+                font-size: 6rem;
+                line-height: 7.5rem;
+            }
+        }
+
+        .top, .bottom, .top-flip, .bottom-flip {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            overflow: hidden;
+            text-align: center;
+            left: 0;
+        }
+
+        .top, .top-flip {
+            top: 0;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            background: #2c2c2c;
+            border-bottom: 1px solid rgba(0,0,0,0.2);
+        }
+
+        .bottom, .bottom-flip {
+            bottom: 0;
+            /* This aligns the bottom half of the number correctly */
+            line-height: 0; 
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            background: #3a3a3a;
+        }
+
+        .top-flip {
+            z-index: 2;
+            transform-origin: bottom;
+            animation: flip-top 0.6s ease-in-out forwards;
+        }
+
+        .bottom-flip {
+            z-index: 2;
+            transform-origin: top;
+            animation: flip-bottom 0.6s ease-in-out forwards;
+        }
+
+        @keyframes flip-top {
+            0% { transform: rotateX(0deg); }
+            100% { transform: rotateX(-90deg); }
+        }
+
+        @keyframes flip-bottom {
+            0% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+
+        /* We add/remove this class with JS to trigger the animation */
+        .flip-card .top-flip, .flip-card .bottom-flip {
+            display: none;
+        }
+        .flip-card.flipping .top-flip, .flip-card.flipping .bottom-flip {
+            display: block;
+        }
+
+
+        .separator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 900;
+            margin: 0 0.5rem;
+            padding-bottom: 1.75rem; /* Adjust to align with bottom of number cards */
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-purple-500 to-pink-500 text-white min-h-screen flex items-center justify-center p-4">
 
@@ -54,8 +144,106 @@
         </div>
     </div>
 
-    <!-- Link to your local JavaScript file -->
-    <script src="script.js"></script>
+    <script>
+        (function () {
+            // --- CONFIGURATION ---
+            const countDownDate = new Date("2025-08-11T07:00:00Z").getTime(); // Las Vegas Time (PDT, UTC-7)
+            const daysContainer = document.getElementById('days-group');
+            const hoursContainer = document.getElementById('hours-group');
+            const minutesContainer = document.getElementById('minutes-group');
+            const secondsContainer = document.getElementById('seconds-group');
+
+            /**
+             * Creates the HTML structure for a flip card.
+             */
+            function createFlipCard(initialValue = '0') {
+                const card = document.createElement('div');
+                card.classList.add('flip-card');
+                card.innerHTML = `
+                    <div class="top">${initialValue}</div>
+                    <div class="bottom">${initialValue}</div>
+                    <div class="top-flip">${initialValue}</div>
+                    <div class="bottom-flip">${initialValue}</div>
+                `;
+                return card;
+            }
+            
+            /**
+             * Creates a group of flip cards for a time unit.
+             */
+            function createFlipGroup(container, numCards) {
+                for (let i = 0; i < numCards; i++) {
+                    container.appendChild(createFlipCard('0'));
+                }
+            }
+
+            /**
+             * Updates a single flip card with a new value.
+             */
+            function updateFlipCard(card, newValue) {
+                const topHalf = card.querySelector('.top');
+                const bottomHalf = card.querySelector('.bottom');
+                const topFlip = card.querySelector('.top-flip');
+                const bottomFlip = card.querySelector('.bottom-flip');
+                
+                const currentValue = topHalf.innerText;
+                if (currentValue === newValue) return;
+
+                topFlip.innerText = currentValue;
+                bottomFlip.innerText = newValue;
+
+                card.classList.add('flipping');
+
+                topFlip.addEventListener('animationend', () => {
+                    topHalf.innerText = newValue;
+                    bottomHalf.innerText = newValue;
+                    card.classList.remove('flipping');
+                }, { once: true });
+            }
+
+            /**
+             * Updates a group of flip cards with a new time value.
+             */
+            function updateFlipGroup(container, newValue) {
+                const cards = container.querySelectorAll('.flip-card');
+                const valueStr = String(newValue).padStart(cards.length, '0');
+                
+                for (let i = 0; i < cards.length; i++) {
+                    updateFlipCard(cards[i], valueStr[i]);
+                }
+            }
+
+            // --- INITIALIZATION ---
+            createFlipGroup(daysContainer, 3);
+            createFlipGroup(hoursContainer, 2);
+            createFlipGroup(minutesContainer, 2);
+            createFlipGroup(secondsContainer, 2);
+
+            // --- MAIN LOOP ---
+            const interval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = countDownDate - now;
+
+                if (distance < 0) {
+                    clearInterval(interval);
+                    document.getElementById('countdown').innerHTML = '<h2 class="text-4xl md:text-6xl font-bold text-yellow-300 drop-shadow-lg">🎉 Happy 18th Birthday, Abby! 🎉</h2>';
+                    document.getElementById('headline').style.display = 'none';
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                updateFlipGroup(daysContainer, days);
+                updateFlipGroup(hoursContainer, hours);
+                updateFlipGroup(minutesContainer, minutes);
+                updateFlipGroup(secondsContainer, seconds);
+
+            }, 1000);
+        })();
+    </script>
 </body>
 </html>
 
