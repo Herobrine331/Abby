@@ -1,0 +1,61 @@
+<!-- STEP 1: Copy and paste all of this code into a file named index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abby's 18th Birthday Countdown</title>
+    
+    <!-- Tailwind CSS for layout (requires internet) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (requires internet) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Link to your local stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gradient-to-br from-purple-500 to-pink-500 text-white min-h-screen flex items-center justify-center p-4">
+
+    <div class="text-center w-full max-w-5xl mx-auto">
+        <!-- Main Title -->
+        <h1 id="headline" class="text-4xl md:text-6xl font-bold tracking-tight mb-8 drop-shadow-lg">
+            Countdown to Abby’s 18th Birthday
+        </h1>
+
+        <!-- Countdown Timer Display -->
+        <div id="countdown" class="flex flex-wrap justify-center items-end gap-x-2 md:gap-x-4">
+            <!-- Days -->
+            <div class="text-center">
+                <div id="days-group" class="flex gap-x-1 md:gap-x-2"></div>
+                <div class="text-lg md:text-xl font-bold opacity-80 mt-2">Days</div>
+            </div>
+            <div class="separator hidden md:inline-flex">:</div>
+            <!-- Hours -->
+            <div class="text-center">
+                <div id="hours-group" class="flex gap-x-1 md:gap-x-2"></div>
+                <div class="text-lg md:text-xl font-bold opacity-80 mt-2">Hours</div>
+            </div>
+            <div class="separator">:</div>
+            <!-- Minutes -->
+            <div class="text-center">
+                <div id="minutes-group" class="flex gap-x-1 md:gap-x-2"></div>
+                <div class="text-lg md:text-xl font-bold opacity-80 mt-2">Minutes</div>
+            </div>
+            <div class="separator">:</div>
+            <!-- Seconds -->
+            <div class="text-center">
+                <div id="seconds-group" class="flex gap-x-1 md:gap-x-2"></div>
+                <div class="text-lg md:text-xl font-bold opacity-80 mt-2">Seconds</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link to your local JavaScript file -->
+    <script src="script.js"></script>
+</body>
+</html>
+
